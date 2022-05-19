@@ -56,12 +56,13 @@ class ShapesGenerator():
         self.weights_color = weights_color
         self.inc_time_noise = inc_time_noise
         self.stroke_weight = stroke_weight
+        self.ratio_margin_noise = 1.5 # 1.5 from stroke weight
 
     def line_noise(self, x1, y1, x2, y2, line_color):
         """Return line with Perlin Noise (like hand-drawn line)"""
         length_line = sqrt((x2 - x1)**2 + (y2 - y1)**2)
-        ratio_margin = 1.5 # 1.5 * stroke_weight
         standar_length = 7 * self.stroke_weight
+        ratio_margin = self.ratio_margin_noise
         if length_line < standar_length:
             ratio_margin = map(length_line, 0, standar_length, 0, ratio_margin)
         margin_off_noise = self.stroke_weight * ratio_margin
@@ -108,13 +109,43 @@ class ShapesGenerator():
         strokeCap(ROUND)
         for i, p in enumerate(list_point):
             j = 0 if i == len(list_point) - 1 else i + 1
+            idx_color = int(random(len(self.list_color)))
             self.line_noise(
                             x1=list_point[i][0],
                             y1=list_point[i][1],
                             x2=list_point[j][0],
                             y2=list_point[j][1],
-                            line_color=self.list_color[:4][i]
+                            line_color=self.list_color[idx_color]
                             )
+
+    def circle_gen(self, height_shape, width_shape, rotate_deg):
+        """Return ellipse almost like circle with noise"""
+        # Ref: https://saylordotorg.github.io/text_intermediate-algebra/s11-03-ellipses.html
+        a = float(width_shape) / 2.0
+        b = float(height_shape) / 2.0
+        c = sqrt(a ** 2 + b ** 2)
+        h = float(self.size_cnv["width"]) / 2.0
+        k = float(self.size_cnv["height"]) / 2.0
+        l = sqrt(h ** 2 + k ** 2)
+        x_off = random(100)
+        stack_vertex = []
+        buff_noise = map(c, 0, l, 1, 2.5)
+        margin_off_noise = self.stroke_weight * self.ratio_margin_noise * buff_noise
+        for x_obs in range(floor(h - a), floor(h + a) + 1):
+            s = sqrt(1 - (float(x_obs - h) / a) ** 2) * b
+            noise_1d = map(noise(x_off), 0, 1, -margin_off_noise, margin_off_noise)
+            stack_vertex.append((x_obs, floor(k + s + noise_1d)))
+            stack_vertex.insert(0, (x_obs, floor(k - s + noise_1d)))
+            x_off += self.inc_time_noise
+        line_color = self.list_color[int(random(len(self.list_color)))]
+        self.rotate_epi(rotate_deg)
+        stroke(line_color[0], line_color[1], line_color[2])
+        strokeWeight(self.stroke_weight)
+        noFill()
+        beginShape()
+        for coord in stack_vertex:
+            vertex(coord[0], coord[1])
+        endShape()
 
     def rectangle_gen(self, height_shape, width_shape, rotate_deg):
         """Create rectangle with 4 points and center canvas position"""
@@ -130,6 +161,7 @@ class ShapesGenerator():
                   ]
         self.rotate_epi(rotate_deg)
         self.render_shape(points)
+
 
 # Initialize class
 size_canvas = {
@@ -161,5 +193,8 @@ def setup():
 # Testing
 def draw():
     background(51)
-    shape_.rectangle_gen(150, 150, -3)
-    
+    shape_.stroke_weight = 6
+    # Rectangle
+    # shape_.rectangle_gen(150, 150, -7)
+    # Circle
+    shape_.circle_gen(180, 60, 30)
