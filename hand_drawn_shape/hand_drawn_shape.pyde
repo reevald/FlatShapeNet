@@ -91,8 +91,8 @@ class ShapesGenerator():
         for x_obs in range(x_min, x_max):
             noise_1d = map(noise(x_off), 0, 1, -margin_off_noise, margin_off_noise)
             y = gradien * (x_obs - x1) + y1 + noise_1d
-            if is_buff_x_horz:
-                x_obs += noise_1d
+            if abs(is_buff_x_horz):
+                x_obs = x_obs + noise_1d if is_buff_x_horz == 1 else x_obs - noise_1d
             vertex(x_obs, y)
             x_off += self.inc_time_noise
         endShape()
@@ -109,7 +109,7 @@ class ShapesGenerator():
     def render_shape(self, list_point, list_buff_x_horz):
         strokeWeight(self.stroke_weight)
         strokeCap(ROUND)
-        for i, p in enumerate(list_point):
+        for i in range(len(list_point)):
             j = 0 if i == len(list_point) - 1 else i + 1
             idx_color = int(random(len(self.list_color)))
             self.line_noise(
@@ -161,21 +161,21 @@ class ShapesGenerator():
         # Ratio a / b with a < b and ax + bx = length of diag_vert for real x
         ratio_diag_vert = random(2.0 / 16.0, 5.0 / 16.0)
         y_intercept_diag = top_diag_vert + floor(ratio_diag_vert * height_shape)
-        y_epi_shape = floor(float(self.size_cnv["width"] / 2.0))
+        x_epi_shape = floor(float(self.size_cnv["width"] / 2.0))
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
         right_diag_horz = self.size_cnv["width"] - left_diag_horz
         points = [
                   (left_diag_horz, y_intercept_diag),
-                  (y_epi_shape, top_diag_vert),
+                  (x_epi_shape, top_diag_vert),
                   (right_diag_horz, y_intercept_diag),
-                  (y_epi_shape, bot_diag_vert)
+                  (x_epi_shape, bot_diag_vert)
                   ]
         self.rotate_epi(rotate_deg)
-        self.render_shape(points, list_buff_x_horz=[0, 0, 1, 1])
+        self.render_shape(points, list_buff_x_horz=[0, 0, 1, -1])
 
     def rectangle_gen(self, height_shape, width_shape, rotate_deg):
-        """Create rectangle with 4 points and center canvas position"""
+        """Return rectangle with 4 points and center canvas position"""
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
@@ -188,6 +188,28 @@ class ShapesGenerator():
                   ]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[0, 0, 0, 0])
+        
+    def rhombus_gen(self, height_shape, width_shape, rotate_deg):
+        """Return rhombus with diagonal horizontal = height_shape,
+        diagonal vertical = width_shape and perlin noise 1D
+        """
+        # Ordinate (y) on diagonal vertical
+        top_diag_vert = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
+        bot_diag_vert = self.size_cnv["height"] - top_diag_vert
+        # Intercept diagonal
+        x_intercept_diag = floor(float(self.size_cnv["width"] / 2.0))
+        y_intercept_diag = floor(float(self.size_cnv["height"] / 2.0))
+        # Axis (x) on diagonal horizontal
+        left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
+        right_diag_horz = self.size_cnv["width"] - left_diag_horz
+        points = [
+                  (left_diag_horz, y_intercept_diag),
+                  (x_intercept_diag, top_diag_vert),
+                  (right_diag_horz, y_intercept_diag),
+                  (x_intercept_diag, bot_diag_vert)
+                  ]
+        self.rotate_epi(rotate_deg)
+        self.render_shape(points, list_buff_x_horz=[1, -1, 1, -1])
 
 
 # Initialize class
@@ -220,10 +242,12 @@ def setup():
 # Testing
 def draw():
     background(51)
-    shape_.stroke_weight = 6
+    shape_.stroke_weight = 8
     # Rectangle
     # shape_.rectangle_gen(150, 150, -7)
     # Circle
     # shape_.circle_gen(180, 60, 30)
     # Kite
-    shape_.kite_gen(80, 50, -25)
+    # shape_.kite_gen(200, 150, 10)
+    # Rhombus
+    shape_.rhombus_gen(180, 120, 20)
