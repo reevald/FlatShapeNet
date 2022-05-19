@@ -58,9 +58,9 @@ class ShapesGenerator():
         self.stroke_weight = stroke_weight
         self.ratio_margin_noise = 1.5 # 1.5 from stroke weight
 
-    def line_noise(self, x1, y1, x2, y2, line_color):
+    def line_noise(self, x1, y1, x2, y2, line_color, is_buff_x_horz):
         """Return line with Perlin Noise (like hand-drawn line)"""
-        length_line = sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        length_line = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         standar_length = 7 * self.stroke_weight
         ratio_margin = self.ratio_margin_noise
         if length_line < standar_length:
@@ -91,6 +91,8 @@ class ShapesGenerator():
         for x_obs in range(x_min, x_max):
             noise_1d = map(noise(x_off), 0, 1, -margin_off_noise, margin_off_noise)
             y = gradien * (x_obs - x1) + y1 + noise_1d
+            if is_buff_x_horz:
+                x_obs += noise_1d
             vertex(x_obs, y)
             x_off += self.inc_time_noise
         endShape()
@@ -104,7 +106,7 @@ class ShapesGenerator():
                   )
         rotate(radians(deg))
 
-    def render_shape(self, list_point):
+    def render_shape(self, list_point, list_buff_x_horz):
         strokeWeight(self.stroke_weight)
         strokeCap(ROUND)
         for i, p in enumerate(list_point):
@@ -115,7 +117,8 @@ class ShapesGenerator():
                             y1=list_point[i][1],
                             x2=list_point[j][0],
                             y2=list_point[j][1],
-                            line_color=self.list_color[idx_color]
+                            line_color=self.list_color[idx_color],
+                            is_buff_x_horz=list_buff_x_horz[i]
                             )
 
     def circle_gen(self, height_shape, width_shape, rotate_deg):
@@ -147,6 +150,30 @@ class ShapesGenerator():
             vertex(coord[0], coord[1])
         endShape()
 
+    def kite_gen(self, height_shape, width_shape, rotate_deg):
+        """Return kite with diagonal horizontal = height_shape,
+        diagonal vertical = width_shape and perlin noise 1D
+        """
+        # Ordinate (y) on diagonal vertical
+        top_diag_vert = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
+        bot_diag_vert = self.size_cnv["height"] - top_diag_vert
+        # Space for: top_diag_vert != intercept_diag != mid_diag_vert
+        # Ratio a / b with a < b and ax + bx = length of diag_vert for real x
+        ratio_diag_vert = random(2.0 / 16.0, 5.0 / 16.0)
+        y_intercept_diag = top_diag_vert + floor(ratio_diag_vert * height_shape)
+        y_epi_shape = floor(float(self.size_cnv["width"] / 2.0))
+        # Axis (x) on diagonal horizontal
+        left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
+        right_diag_horz = self.size_cnv["width"] - left_diag_horz
+        points = [
+                  (left_diag_horz, y_intercept_diag),
+                  (y_epi_shape, top_diag_vert),
+                  (right_diag_horz, y_intercept_diag),
+                  (y_epi_shape, bot_diag_vert)
+                  ]
+        self.rotate_epi(rotate_deg)
+        self.render_shape(points, list_buff_x_horz=[0, 0, 1, 1])
+
     def rectangle_gen(self, height_shape, width_shape, rotate_deg):
         """Create rectangle with 4 points and center canvas position"""
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
@@ -160,7 +187,7 @@ class ShapesGenerator():
                   (x_left_shape, y_bot_shape)
                   ]
         self.rotate_epi(rotate_deg)
-        self.render_shape(points)
+        self.render_shape(points, list_buff_x_horz=[0, 0, 0, 0])
 
 
 # Initialize class
@@ -197,4 +224,6 @@ def draw():
     # Rectangle
     # shape_.rectangle_gen(150, 150, -7)
     # Circle
-    shape_.circle_gen(180, 60, 30)
+    # shape_.circle_gen(180, 60, 30)
+    # Kite
+    shape_.kite_gen(80, 50, -25)
