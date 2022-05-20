@@ -22,16 +22,14 @@ import os
 
 
 # Folder preparation
-labels = [
-         "circle",
-         "kite",
-         "rectangle",
-         "rhombus",
-         "parallelogram",
-         "square",
-         "trapezoid",
-         "triangle"
-]
+labels = ["circle",
+          "kite",
+          "rectangle",
+          "rhombus",
+          "parallelogram",
+          "square",
+          "trapezoid",
+          "triangle"]
 base_dir = os.path.join(os.getcwd(), "dataset")
 train_dir = os.path.join(base_dir, "train")
 val_dir = os.path.join(base_dir, "val")
@@ -99,10 +97,8 @@ class ShapesGenerator():
     def rotate_epi(self, deg):
         x_epi = float(self.size_cnv["width"]) / 2.0
         y_epi = float(self.size_cnv["height"]) / 2.0
-        translate(
-                  x_epi - (x_epi * cos(radians(deg)) - y_epi * sin(radians(deg))),
-                  y_epi - (y_epi * cos(radians(deg)) + x_epi * sin(radians(deg)))
-                  )
+        translate(x_epi - (x_epi * cos(radians(deg)) - y_epi * sin(radians(deg))),
+                  y_epi - (y_epi * cos(radians(deg)) + x_epi * sin(radians(deg))))
         rotate(radians(deg))
 
     def render_shape(self, list_point, list_buff_x_horz):
@@ -111,14 +107,12 @@ class ShapesGenerator():
         for i in range(len(list_point)):
             j = 0 if i == len(list_point) - 1 else i + 1
             idx_color = int(random(len(self.list_color)))
-            self.line_noise(
-                            x1=list_point[i][0],
+            self.line_noise(x1=list_point[i][0],
                             y1=list_point[i][1],
                             x2=list_point[j][0],
                             y2=list_point[j][1],
                             line_color=self.list_color[idx_color],
-                            is_buff_x_horz=list_buff_x_horz[i]
-                            )
+                            is_buff_x_horz=list_buff_x_horz[i])
 
     def circle_gen(self, height_shape, width_shape, rotate_deg):
         """Return ellipse almost like circle with noise"""
@@ -164,12 +158,10 @@ class ShapesGenerator():
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
         right_diag_horz = self.size_cnv["width"] - left_diag_horz
-        points = [
-                  (left_diag_horz, y_intercept_diag),
+        points = [(left_diag_horz, y_intercept_diag),
                   (x_epi_shape, top_diag_vert),
                   (right_diag_horz, y_intercept_diag),
-                  (x_epi_shape, bot_diag_vert)
-                  ]
+                  (x_epi_shape, bot_diag_vert)]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[0, 0, 1, -1])
 
@@ -179,12 +171,10 @@ class ShapesGenerator():
         y_bot_shape = self.size_cnv["height"] - y_top_shape
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
         x_right_shape = self.size_cnv["width"] - x_left_shape
-        points = [
-                  (x_left_shape, y_top_shape),
+        points = [(x_left_shape, y_top_shape),
                   (x_right_shape, y_top_shape),
                   (x_right_shape, y_bot_shape),
-                  (x_left_shape, y_bot_shape)
-                  ]
+                  (x_left_shape, y_bot_shape)]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[0, 0, 0, 0])
         
@@ -201,12 +191,10 @@ class ShapesGenerator():
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
         right_diag_horz = self.size_cnv["width"] - left_diag_horz
-        points = [
-                  (left_diag_horz, y_intercept_diag),
+        points = [(left_diag_horz, y_intercept_diag),
                   (x_intercept_diag, top_diag_vert),
                   (right_diag_horz, y_intercept_diag),
-                  (x_intercept_diag, bot_diag_vert)
-                  ]
+                  (x_intercept_diag, bot_diag_vert)]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[1, -1, 1, -1])
 
@@ -218,20 +206,16 @@ class ShapesGenerator():
         x_right_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        points = [
-                  (x_right_shape - min_base, y_top_shape),
+        points = [(x_right_shape - min_base, y_top_shape),
                   (x_right_shape, y_top_shape),
                   (x_left_shape + min_base, y_bot_shape),
-                  (x_left_shape, y_bot_shape)
-                  ]
+                  (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, 1, 0, 1]
         if flip_horz:
-            points = [
-                      (x_left_shape, y_top_shape),
+            points = [(x_left_shape, y_top_shape),
                       (x_left_shape + min_base, y_top_shape),
                       (x_right_shape, y_bot_shape),
-                      (x_right_shape - min_base, y_bot_shape)
-                      ]
+                      (x_right_shape - min_base, y_bot_shape)]
             list_buff_x_horz = [0, -1, 0, -1]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
@@ -251,41 +235,54 @@ class ShapesGenerator():
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
         space_unshape = floor(random(x_left_shape, x_right_shape - min_parallel))
-        points = [
-                  (space_unshape, y_top_shape),
+        points = [(space_unshape, y_top_shape),
                   (space_unshape + min_parallel, y_top_shape),
                   (x_right_shape, y_bot_shape),
-                  (x_left_shape, y_bot_shape)
-                  ]
+                  (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, -1, 0, 1]
         if flip_vert:
-            points = [
-                      (x_left_shape, y_top_shape),
+            points = [(x_left_shape, y_top_shape),
                       (x_right_shape, y_top_shape),
                       (space_unshape + min_parallel, y_bot_shape),
-                      (space_unshape, y_bot_shape)
-                      ]
+                      (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, 0, -1]
+        self.rotate_epi(rotate_deg)
+        self.render_shape(points, list_buff_x_horz)
+
+    def triangle_gen(self, height_shape, width_shape, rotate_deg, flip_vert):
+        """Return triangle with base equals to width_shape
+        Support equilateral, isosceles, right-angle, and any triangle
+        """
+        x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
+        x_right_shape = self.size_cnv["width"] - x_left_shape
+        y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
+        y_bot_shape = self.size_cnv["height"] - y_top_shape
+        space_unshape = floor(random(x_left_shape, x_right_shape))
+        points = [(space_unshape, y_top_shape),
+                  (x_right_shape, y_bot_shape),
+                  (x_left_shape, y_bot_shape)]
+        list_buff_x_horz = [-1, 0, 1]
+        if flip_vert:
+            points = [(x_left_shape, y_top_shape),
+                      (x_right_shape, y_top_shape),
+                      (space_unshape, y_bot_shape)]
+            list_buff_x_horz = [0, 1, -1]
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
 
 
 # Initialize class
-size_canvas = {
-            "width": 224, 
-            "height": 224
-            }
+size_canvas = {"width": 224, 
+               "height": 224}
 shape_ = ShapesGenerator(size_cnv=size_canvas,
                          inc_time_noise=0.025,
                          stroke_weight=4,
-                         list_color=[
-                                     (0, 0, 0), # Black
+                         list_color=[(0, 0, 0), # Black
                                      (255, 0, 0), # Red
                                      (160, 32, 255), # Purple
                                      (0, 32, 255), # Blue
                                      (0, 192, 0), # Green
-                                     (255, 160, 16) # Orange
-                                     ])
+                                     (255, 160, 16)]) # Orange
 
 
 def setup():
@@ -296,18 +293,20 @@ def setup():
 # Testing
 def draw():
     background(51)
-    shape_.stroke_weight = 6
+    shape_.stroke_weight = 4
     # Rectangle
-    # shape_.rectangle_gen(150, 150, -7)
+    shape_.rectangle_gen(150, 150, -7)
     # Circle
-    # shape_.circle_gen(180, 60, 30)
+    shape_.circle_gen(180, 60, 30)
     # Kite
-    # shape_.kite_gen(200, 150, 10)
+    shape_.kite_gen(200, 150, 10)
     # Rhombus
-    # shape_.rhombus_gen(180, 120, 30)
+    shape_.rhombus_gen(180, 120, 30)
     # Parallelogram
-    # shape_.parallelogram_gen(70, 90, 0, 0.5, False)
+    shape_.parallelogram_gen(70, 90, 0, 0.5, True)
     # Square
-    # shape_.square_gen(130, 0)
+    shape_.square_gen(130, 0)
     # Trapezoid
     shape_.trapezoid_gen(120, 150, 0, 0.4, True)
+    # Triangle
+    shape_.triangle_gen(120, 100, 0, True)
