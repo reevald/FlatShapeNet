@@ -69,7 +69,7 @@ class ShapesGenerator():
         strokeWeight(self.stroke_weight)
         noFill()
         beginShape()
-        if x1 == x2:
+        if x1 == x2 or abs(x1 - x2) < 5:
             y_min = y1 if y1 < y2 else y2
             y_max = y1 if y1 > y2 else y2
             # Time for perlin noise from random number (prevent same noise)
@@ -210,36 +210,64 @@ class ShapesGenerator():
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[1, -1, 1, -1])
 
-    def parallelogram_gen(self, height_shape, width_shape, rotate_deg, acute_deg, flip_horz):
-        """Return parallelogram with acute angle deg < 90,
-        use trigonometry to calculate slope and get the vertex (points)
-        """
-        max_acute_deg = degrees(atan(float(width_shape) / float(height_shape)))
-        # Validate acute deg must be between [0, max_acute_deg]
-        if acute_deg > max_acute_deg:
-            acute_deg = random(0.25 * max_acute_deg, 0.75 * max_acute_deg)
+    def parallelogram_gen(self, height_shape, width_shape, rotate_deg, ratio_base, flip_horz):
+        """Return parallelogram with ratio base (top-bot sides)"""
+        # Standar of ratio base in range[0.25, 0.75]
+        min_base = floor(ratio_base * width_shape)
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
         x_right_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        space_unshape = floor(tan(radians(acute_deg)) * height_shape)
         points = [
-                  (x_left_shape + space_unshape, y_top_shape),
+                  (x_right_shape - min_base, y_top_shape),
                   (x_right_shape, y_top_shape),
-                  (x_right_shape - space_unshape, y_bot_shape),
+                  (x_left_shape + min_base, y_bot_shape),
                   (x_left_shape, y_bot_shape)
                   ]
-        list_buff_x_horz = [1, 1, 1, 1]
+        list_buff_x_horz = [0, 1, 0, 1]
         if flip_horz:
             points = [
                       (x_left_shape, y_top_shape),
-                      (x_right_shape - space_unshape, y_top_shape),
+                      (x_left_shape + min_base, y_top_shape),
                       (x_right_shape, y_bot_shape),
-                      (x_left_shape + space_unshape, y_bot_shape)
+                      (x_right_shape - min_base, y_bot_shape)
                       ]
-            list_buff_x_horz = [1, -1, 1, -1]
+            list_buff_x_horz = [0, -1, 0, -1]
         self.rotate_epi(rotate_deg)
-        self.render_shape(points, list_buff_x_horz) 
+        self.render_shape(points, list_buff_x_horz)
+
+    def square_gen(self, length_shape, rotate_shape):
+        """Return square with 4 points and center canvas position"""
+        self.rectangle_gen(length_shape, length_shape, rotate_shape)
+
+    def trapezoid_gen(self, height_shape, width_shape, rotate_deg, ratio_parallel, flip_vert):
+        """Return trapezoid with one pair of parallel sides (determine by ratio)
+        Support isosceles, right-angle, and any trapezoid
+        """
+        # Standar of ratio parallel in range[0.25, 0.75]
+        min_parallel = floor(ratio_parallel * width_shape)
+        x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
+        x_right_shape = self.size_cnv["width"] - x_left_shape
+        y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
+        y_bot_shape = self.size_cnv["height"] - y_top_shape
+        space_unshape = floor(random(x_left_shape, x_right_shape - min_parallel))
+        points = [
+                  (space_unshape, y_top_shape),
+                  (space_unshape + min_parallel, y_top_shape),
+                  (x_right_shape, y_bot_shape),
+                  (x_left_shape, y_bot_shape)
+                  ]
+        list_buff_x_horz = [0, -1, 0, 1]
+        if flip_vert:
+            points = [
+                      (x_left_shape, y_top_shape),
+                      (x_right_shape, y_top_shape),
+                      (space_unshape + min_parallel, y_bot_shape),
+                      (space_unshape, y_bot_shape)
+                      ]
+            list_buff_x_horz = [0, 1, 0, -1]
+        self.rotate_epi(rotate_deg)
+        self.render_shape(points, list_buff_x_horz)
 
 
 # Initialize class
@@ -278,4 +306,8 @@ def draw():
     # Rhombus
     # shape_.rhombus_gen(180, 120, 30)
     # Parallelogram
-    shape_.parallelogram_gen(70, 90, 0, 180, True)
+    # shape_.parallelogram_gen(70, 90, 0, 0.5, False)
+    # Square
+    # shape_.square_gen(130, 0)
+    # Trapezoid
+    shape_.trapezoid_gen(120, 150, 0, 0.4, True)
