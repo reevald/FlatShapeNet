@@ -50,10 +50,9 @@ except OSError as err:
 
 # Blueprint shapes
 class ShapesGenerator():
-    def __init__(self, size_cnv, inc_time_noise, stroke_weight, list_color, weights_color):
+    def __init__(self, size_cnv, inc_time_noise, stroke_weight, list_color):
         self.size_cnv = size_cnv
         self.list_color = list_color
-        self.weights_color = weights_color
         self.inc_time_noise = inc_time_noise
         self.stroke_weight = stroke_weight
         self.ratio_margin_noise = 1.5 # 1.5 from stroke weight
@@ -211,6 +210,37 @@ class ShapesGenerator():
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[1, -1, 1, -1])
 
+    def parallelogram_gen(self, height_shape, width_shape, rotate_deg, acute_deg, flip_horz):
+        """Return parallelogram with acute angle deg < 90,
+        use trigonometry to calculate slope and get the vertex (points)
+        """
+        max_acute_deg = degrees(atan(float(width_shape) / float(height_shape)))
+        # Validate acute deg must be between [0, max_acute_deg]
+        if acute_deg > max_acute_deg:
+            acute_deg = random(0.25 * max_acute_deg, 0.75 * max_acute_deg)
+        x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
+        x_right_shape = self.size_cnv["width"] - x_left_shape
+        y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
+        y_bot_shape = self.size_cnv["height"] - y_top_shape
+        space_unshape = floor(tan(radians(acute_deg)) * height_shape)
+        points = [
+                  (x_left_shape + space_unshape, y_top_shape),
+                  (x_right_shape, y_top_shape),
+                  (x_right_shape - space_unshape, y_bot_shape),
+                  (x_left_shape, y_bot_shape)
+                  ]
+        list_buff_x_horz = [1, 1, 1, 1]
+        if flip_horz:
+            points = [
+                      (x_left_shape, y_top_shape),
+                      (x_right_shape - space_unshape, y_top_shape),
+                      (x_right_shape, y_bot_shape),
+                      (x_left_shape + space_unshape, y_bot_shape)
+                      ]
+            list_buff_x_horz = [1, -1, 1, -1]
+        self.rotate_epi(rotate_deg)
+        self.render_shape(points, list_buff_x_horz) 
+
 
 # Initialize class
 size_canvas = {
@@ -227,11 +257,7 @@ shape_ = ShapesGenerator(size_cnv=size_canvas,
                                      (0, 32, 255), # Blue
                                      (0, 192, 0), # Green
                                      (255, 160, 16) # Orange
-                                     ],
-                         weights_color=[
-                                        0.167, 0.167, 0.167, 0.167,
-                                        0.167, 0.167, 0.167, 0.167
-                         ])
+                                     ])
 
 
 def setup():
@@ -242,7 +268,7 @@ def setup():
 # Testing
 def draw():
     background(51)
-    shape_.stroke_weight = 8
+    shape_.stroke_weight = 6
     # Rectangle
     # shape_.rectangle_gen(150, 150, -7)
     # Circle
@@ -250,4 +276,6 @@ def draw():
     # Kite
     # shape_.kite_gen(200, 150, 10)
     # Rhombus
-    shape_.rhombus_gen(180, 120, 20)
+    # shape_.rhombus_gen(180, 120, 30)
+    # Parallelogram
+    shape_.parallelogram_gen(70, 90, 0, 180, True)
