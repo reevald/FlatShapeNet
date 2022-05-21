@@ -30,7 +30,23 @@ labels = ["circle",
           "square",
           "trapezoid",
           "triangle"]
-base_dir = os.path.join(os.getcwd(), "dataset")
+
+# Default constants value
+constants = {"PATH_DEST": os.getcwd(),
+             "NUM_TRAIN": 3,
+             "NUM_VAL": 3,
+             "NUM_TEST": 10}
+# Inject value by env variables
+for key_constant in constants:
+    try:
+        if os.environ[key_constant]:
+            # Validate number value
+            value = os.environ[key_constant]
+            constants[key_constant] = abs(int(value)) if key_constant.split("_")[0] == "NUM" else value
+    except KeyError:
+        print("{} enviroment variable is not set".format(key_constant))
+
+base_dir = os.path.join(constants["PATH_DEST"], "dataset")
 train_dir = os.path.join(base_dir, "train")
 val_dir = os.path.join(base_dir, "val")
 test_dir = os.path.join(base_dir, "test")
@@ -67,7 +83,7 @@ class ShapesGenerator():
         strokeWeight(self.stroke_weight)
         noFill()
         beginShape()
-        if x1 == x2 or abs(x1 - x2) < 5:
+        if abs(x1 - x2) < 5:
             y_min = y1 if y1 < y2 else y2
             y_max = y1 if y1 > y2 else y2
             # Time for perlin noise from random number (prevent same noise)
@@ -127,13 +143,14 @@ class ShapesGenerator():
         stack_vertex = []
         buff_noise = map(c, 0, l, 1, 2.5)
         margin_off_noise = self.stroke_weight * self.ratio_margin_noise * buff_noise
-        for x_obs in range(floor(h - a), floor(h + a) + 1):
+        for x_obs in range(floor(h - a) + 1, floor(h + a) + 1):
             s = sqrt(1 - (float(x_obs - h) / a) ** 2) * b
             noise_1d = map(noise(x_off), 0, 1, -margin_off_noise, margin_off_noise)
             stack_vertex.append((x_obs, floor(k + s + noise_1d)))
             stack_vertex.insert(0, (x_obs, floor(k - s + noise_1d)))
             x_off += self.inc_time_noise
         line_color = self.list_color[int(random(len(self.list_color)))]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         stroke(line_color[0], line_color[1], line_color[2])
         strokeWeight(self.stroke_weight)
@@ -142,6 +159,7 @@ class ShapesGenerator():
         for coord in stack_vertex:
             vertex(coord[0], coord[1])
         endShape()
+        popMatrix()
 
     def kite_gen(self, height_shape, width_shape, rotate_deg):
         """Return kite with diagonal horizontal = height_shape,
@@ -162,8 +180,10 @@ class ShapesGenerator():
                   (x_epi_shape, top_diag_vert),
                   (right_diag_horz, y_intercept_diag),
                   (x_epi_shape, bot_diag_vert)]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[0, 0, 1, -1])
+        popMatrix()
 
     def rectangle_gen(self, height_shape, width_shape, rotate_deg):
         """Return rectangle with 4 points and center canvas position"""
@@ -175,8 +195,10 @@ class ShapesGenerator():
                   (x_right_shape, y_top_shape),
                   (x_right_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[0, 0, 0, 0])
+        popMatrix()
         
     def rhombus_gen(self, height_shape, width_shape, rotate_deg):
         """Return rhombus with diagonal horizontal = height_shape,
@@ -195,8 +217,10 @@ class ShapesGenerator():
                   (x_intercept_diag, top_diag_vert),
                   (right_diag_horz, y_intercept_diag),
                   (x_intercept_diag, bot_diag_vert)]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz=[1, -1, 1, -1])
+        popMatrix()
 
     def parallelogram_gen(self, height_shape, width_shape, rotate_deg, ratio_base, flip_horz):
         """Return parallelogram with ratio base (top-bot sides)"""
@@ -217,12 +241,14 @@ class ShapesGenerator():
                       (x_right_shape, y_bot_shape),
                       (x_right_shape - min_base, y_bot_shape)]
             list_buff_x_horz = [0, -1, 0, -1]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
+        popMatrix()
 
-    def square_gen(self, length_shape, rotate_shape):
+    def square_gen(self, length_shape, rotate_deg):
         """Return square with 4 points and center canvas position"""
-        self.rectangle_gen(length_shape, length_shape, rotate_shape)
+        self.rectangle_gen(length_shape, length_shape, rotate_deg)
 
     def trapezoid_gen(self, height_shape, width_shape, rotate_deg, ratio_parallel, flip_vert):
         """Return trapezoid with one pair of parallel sides (determine by ratio)
@@ -246,8 +272,10 @@ class ShapesGenerator():
                       (space_unshape + min_parallel, y_bot_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, 0, -1]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
+        popMatrix()
 
     def triangle_gen(self, height_shape, width_shape, rotate_deg, flip_vert):
         """Return triangle with base equals to width_shape
@@ -267,8 +295,10 @@ class ShapesGenerator():
                       (x_right_shape, y_top_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, -1]
+        pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
+        popMatrix()
 
 
 # Initialize class
@@ -287,26 +317,81 @@ shape_ = ShapesGenerator(size_cnv=size_canvas,
 
 def setup():
     size(size_canvas["width"], size_canvas["height"])
-    noLoop()
 
-
-# Testing
+img_counter = 0
+# Order: start => train => val => test => stop
+toggle_bool = True
+base_class_dir = train_dir
 def draw():
-    background(51)
-    shape_.stroke_weight = 4
+    global base_class_dir
+    global img_counter
+    global toggle_bool
+    if img_counter == constants["NUM_TRAIN"]:
+        base_class_dir = val_dir
+    if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"]:
+        base_class_dir = test_dir
+    if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"] + constants["NUM_TEST"] - 1:
+        noLoop()
+    shape_.stroke_weight = int(random(4, 10))
     # Rectangle
-    shape_.rectangle_gen(150, 150, -7)
+    background(255)
+    min_length = int(random(50, 150))
+    max_length = int(random(min_length + 30, 200))
+    shape_.rectangle_gen(height_shape=max_length if toggle_bool else min_length,
+                         width_shape=min_length if toggle_bool else max_length,
+                         rotate_deg=int(random(-5, 5)))
+    save(os.path.join(base_class_dir, "rectangle", "rectangle-{}.jpg".format(img_counter)))
     # Circle
-    shape_.circle_gen(180, 60, 30)
+    background(255)
+    max_length = int(random(min_length, min_length + 50))
+    shape_.circle_gen(height_shape=max_length if toggle_bool else min_length,
+                      width_shape=min_length if toggle_bool else max_length,
+                      rotate_deg=int(random(-180, 180)))
+    save(os.path.join(base_class_dir, "circle", "circle-{}.jpg".format(img_counter)))
     # Kite
-    shape_.kite_gen(200, 150, 10)
+    background(255)
+    max_length = int(random(min_length + 30, 200))
+    shape_.kite_gen(height_shape=max_length,
+                    width_shape=min_length,
+                    rotate_deg=int(random(-30, 30)))
+    save(os.path.join(base_class_dir, "kite", "kite-{}.jpg".format(img_counter)))
     # Rhombus
-    shape_.rhombus_gen(180, 120, 30)
+    background(255)
+    shape_.rhombus_gen(height_shape=max_length,
+                       width_shape=min_length,
+                       rotate_deg=int(random(-20, 20)))
+    save(os.path.join(base_class_dir, "rhombus", "rhombus-{}.jpg".format(img_counter)))
     # Parallelogram
-    shape_.parallelogram_gen(70, 90, 0, 0.5, True)
+    background(255)
+    min_length = int(random(50, 200))
+    max_length = int(random(min_length, 200))
+    shape_.parallelogram_gen(height_shape=min_length,
+                             width_shape=max_length,
+                             rotate_deg=int(random(-10, 10)),
+                             ratio_base=random(0.4, 0.7),
+                             flip_horz=toggle_bool)
+    save(os.path.join(base_class_dir, "parallelogram", "parallelogram-{}.jpg".format(img_counter)))
     # Square
-    shape_.square_gen(130, 0)
+    background(255)
+    shape_.square_gen(length_shape=int(random(50, 200)),
+                      rotate_deg=int(random(-5, 5)))
+    save(os.path.join(base_class_dir, "square", "square-{}.jpg".format(img_counter)))
     # Trapezoid
-    shape_.trapezoid_gen(120, 150, 0, 0.4, True)
+    background(255)
+    shape_.trapezoid_gen(height_shape=min_length,
+                         width_shape=max_length,
+                         rotate_deg=int(random(-10, 10)),
+                         ratio_parallel=random(0.35, 0.55),
+                         flip_vert=toggle_bool)
+    save(os.path.join(base_class_dir, "trapezoid", "trapezoid-{}.jpg".format(img_counter)))
     # Triangle
-    shape_.triangle_gen(120, 100, 0, True)
+    background(255)
+    min_length = int(random(50, 150))
+    max_length = int(random(min_length, 180))
+    shape_.triangle_gen(height_shape=max_length if toggle_bool else min_length,
+                        width_shape=min_length if toggle_bool else max_length,
+                        rotate_deg=int(random(-30, 30)),
+                        flip_vert=toggle_bool)
+    save(os.path.join(base_class_dir, "triangle", "triangle-{}.jpg".format(img_counter)))
+    img_counter += 1
+    toggle_bool = not toggle_bool
