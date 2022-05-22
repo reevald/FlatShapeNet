@@ -33,16 +33,22 @@ labels = ["circle",
 
 # Default constants value
 constants = {"PATH_DEST": os.getcwd(),
-             "NUM_TRAIN": 3,
-             "NUM_VAL": 3,
-             "NUM_TEST": 10}
+             "NUM_TRAIN": 1000,
+             "NUM_VAL": 250,
+             "NUM_TEST": 250}
+
 # Inject value by env variables
 for key_constant in constants:
     try:
         if os.environ[key_constant]:
-            # Validate number value
-            value = os.environ[key_constant]
-            constants[key_constant] = abs(int(value)) if key_constant.split("_")[0] == "NUM" else value
+            # Validate env variable
+            type_constant = key_constant.split("_")[0]
+            if type_constant == "NUM":
+                constants[key_constant] = abs(int(os.environ[key_constant]))
+            elif type_constant == "PATH" and os.path.exists(os.environ[key_constant]):
+                constants[key_constant] = os.environ[key_constant]
+            else:
+                print("{} is invalid".format(key_constant))
     except KeyError:
         print("{} enviroment variable is not set".format(key_constant))
 
@@ -330,8 +336,6 @@ def draw():
         base_class_dir = val_dir
     if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"]:
         base_class_dir = test_dir
-    if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"] + constants["NUM_TEST"] - 1:
-        noLoop()
     shape_.stroke_weight = int(random(4, 10))
     # Rectangle
     background(255)
@@ -393,5 +397,16 @@ def draw():
                         rotate_deg=int(random(-30, 30)),
                         flip_vert=toggle_bool)
     save(os.path.join(base_class_dir, "triangle", "triangle-{}.jpg".format(img_counter)))
+    if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"] + constants["NUM_TEST"] - 1:
+        background(200)
+        msg = "Dataset Created!"
+        print(msg)
+        pushStyle()
+        fill(0)
+        textSize(size_canvas["width"] * 0.1)
+        textAlign(CENTER, CENTER)
+        text(msg, size_canvas["width"] / 2.0, size_canvas["height"] / 2.0)
+        popStyle()
+        noLoop()
     img_counter += 1
     toggle_bool = not toggle_bool
