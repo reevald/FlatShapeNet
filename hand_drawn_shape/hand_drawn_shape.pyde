@@ -1,18 +1,18 @@
-# Copyrigth 2022 Mochammad Galang Rivaldo
+# Copyright 2022 Mochammad Galang Rivaldo
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 # associated documentation files (the "Software"), to deal in the Software without restriction,
-# including without limitation the rigths to use, copy, modify, merge, publish, distribute, sublicense,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do
 # so, subject to the following conditions:
 
-# The above copyrigth notice and this permission notice shall be included in all copies or substantial
+# The above copyright notice and this permission notice shall be included in all copies or substantial
 # portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 # PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYrigth HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 # AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
@@ -182,16 +182,16 @@ class ShapesGenerator():
         x_epi_shape = floor(float(self.size_cnv["width"] / 2.0))
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        rigth_diag_horz = self.size_cnv["width"] - left_diag_horz
+        right_diag_horz = self.size_cnv["width"] - left_diag_horz
         points = [(left_diag_horz, top_diag_vert + space_diag_vert),
                   (x_epi_shape, top_diag_vert),
-                  (rigth_diag_horz, top_diag_vert + space_diag_vert),
+                  (right_diag_horz, top_diag_vert + space_diag_vert),
                   (x_epi_shape, bot_diag_vert)]
         list_buff_x_horz = [0, 0, 1, -1]
         if flip_vert:
             points = [(left_diag_horz, bot_diag_vert - space_diag_vert),
                       (x_epi_shape, top_diag_vert),
-                      (rigth_diag_horz, bot_diag_vert - space_diag_vert),
+                      (right_diag_horz, bot_diag_vert - space_diag_vert),
                       (x_epi_shape, bot_diag_vert)]
             list_buff_x_horz = [1, -1, 0, 0]
         pushMatrix()
@@ -204,10 +204,10 @@ class ShapesGenerator():
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_rigth_shape = self.size_cnv["width"] - x_left_shape
+        x_right_shape = self.size_cnv["width"] - x_left_shape
         points = [(x_left_shape, y_top_shape),
-                  (x_rigth_shape, y_top_shape),
-                  (x_rigth_shape, y_bot_shape),
+                  (x_right_shape, y_top_shape),
+                  (x_right_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -226,10 +226,10 @@ class ShapesGenerator():
         y_intercept_diag = floor(float(self.size_cnv["height"] / 2.0))
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        rigth_diag_horz = self.size_cnv["width"] - left_diag_horz
+        right_diag_horz = self.size_cnv["width"] - left_diag_horz
         points = [(left_diag_horz, y_intercept_diag),
                   (x_intercept_diag, top_diag_vert),
-                  (rigth_diag_horz, y_intercept_diag),
+                  (right_diag_horz, y_intercept_diag),
                   (x_intercept_diag, bot_diag_vert)]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -241,19 +241,19 @@ class ShapesGenerator():
         # Standar of ratio base in range[0.25, 0.75]
         min_base = floor(ratio_base * width_shape)
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_rigth_shape = self.size_cnv["width"] - x_left_shape
+        x_right_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        points = [(x_rigth_shape - min_base, y_top_shape),
-                  (x_rigth_shape, y_top_shape),
+        points = [(x_right_shape - min_base, y_top_shape),
+                  (x_right_shape, y_top_shape),
                   (x_left_shape + min_base, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, 1, 0, 1]
         if flip_horz:
             points = [(x_left_shape, y_top_shape),
                       (x_left_shape + min_base, y_top_shape),
-                      (x_rigth_shape, y_bot_shape),
-                      (x_rigth_shape - min_base, y_bot_shape)]
+                      (x_right_shape, y_bot_shape),
+                      (x_right_shape - min_base, y_bot_shape)]
             list_buff_x_horz = [0, -1, 0, -1]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -266,23 +266,23 @@ class ShapesGenerator():
 
     def trapezoid_gen(self, height_shape, width_shape, rotate_deg, ratio_parallel, flip_vert):
         """Return trapezoid with one pair of parallel sides (determine by ratio)
-        Support isosceles, rigth-angle, and any trapezoid
+        Support isosceles, right-angle, and any trapezoid
         """
         # Standar of ratio parallel in range[0.25, 0.75]
         min_parallel = floor(ratio_parallel * width_shape)
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_rigth_shape = self.size_cnv["width"] - x_left_shape
+        x_right_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        space_unshape = floor(random(x_left_shape, x_rigth_shape - min_parallel))
+        space_unshape = floor(random(x_left_shape, x_right_shape - min_parallel))
         points = [(space_unshape, y_top_shape),
                   (space_unshape + min_parallel, y_top_shape),
-                  (x_rigth_shape, y_bot_shape),
+                  (x_right_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, -1, 0, 1]
         if flip_vert:
             points = [(x_left_shape, y_top_shape),
-                      (x_rigth_shape, y_top_shape),
+                      (x_right_shape, y_top_shape),
                       (space_unshape + min_parallel, y_bot_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, 0, -1]
@@ -293,20 +293,20 @@ class ShapesGenerator():
 
     def triangle_gen(self, height_shape, width_shape, rotate_deg, flip_vert):
         """Return triangle with base equals to width_shape
-        Support equilateral, isosceles, rigth-angle, and any triangle
+        Support equilateral, isosceles, right-angle, and any triangle
         """
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_rigth_shape = self.size_cnv["width"] - x_left_shape
+        x_right_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        space_unshape = floor(random(x_left_shape, x_rigth_shape))
+        space_unshape = floor(random(x_left_shape, x_right_shape))
         points = [(space_unshape, y_top_shape),
-                  (x_rigth_shape, y_bot_shape),
+                  (x_right_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [-1, 0, 1]
         if flip_vert:
             points = [(x_left_shape, y_top_shape),
-                      (x_rigth_shape, y_top_shape),
+                      (x_right_shape, y_top_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, -1]
         pushMatrix()
