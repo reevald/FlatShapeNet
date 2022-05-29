@@ -1,18 +1,18 @@
-# Copyright 2022 Mochammad Galang Rivaldo
+# Copyrigth 2022 Mochammad Galang Rivaldo
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 # associated documentation files (the "Software"), to deal in the Software without restriction,
-# including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# including without limitation the rigths to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do
 # so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in all copies or substantial
+# The above copyrigth notice and this permission notice shall be included in all copies or substantial
 # portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 # PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+# COPYrigth HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 # AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
@@ -33,9 +33,9 @@ labels = ["circle",
 
 # Default constants value
 constants = {"PATH_DEST": os.getcwd(),
-             "NUM_TRAIN": 1000,
-             "NUM_VAL": 250,
-             "NUM_TEST": 250}
+             "NUM_TRAIN": 1500,
+             "NUM_VAL": 500,
+             "NUM_TEST": 500}
 
 # Inject value by env variables
 for key_constant in constants:
@@ -76,6 +76,7 @@ class ShapesGenerator():
         self.inc_time_noise = inc_time_noise
         self.stroke_weight = stroke_weight
         self.ratio_margin_noise = 1.5 # 1.5 from stroke weight
+        self.img_mask_dashed_noise = None
 
     def line_noise(self, x1, y1, x2, y2, line_color, is_buff_x_horz):
         """Return line with Perlin Noise (like hand-drawn line)"""
@@ -89,7 +90,7 @@ class ShapesGenerator():
         strokeWeight(self.stroke_weight)
         noFill()
         beginShape()
-        if abs(x1 - x2) < 5:
+        if abs(x1 - x2) < 10:
             y_min = y1 if y1 < y2 else y2
             y_max = y1 if y1 > y2 else y2
             # Time for perlin noise from random number (prevent same noise)
@@ -167,7 +168,7 @@ class ShapesGenerator():
         endShape()
         popMatrix()
 
-    def kite_gen(self, height_shape, width_shape, rotate_deg):
+    def kite_gen(self, height_shape, width_shape, rotate_deg, flip_vert):
         """Return kite with diagonal horizontal = height_shape,
         diagonal vertical = width_shape and perlin noise 1D
         """
@@ -177,18 +178,25 @@ class ShapesGenerator():
         # Space for: top_diag_vert != intercept_diag != mid_diag_vert
         # Ratio a / b with a < b and ax + bx = length of diag_vert for real x
         ratio_diag_vert = random(2.0 / 16.0, 5.0 / 16.0)
-        y_intercept_diag = top_diag_vert + floor(ratio_diag_vert * height_shape)
+        space_diag_vert = floor(ratio_diag_vert * height_shape)
         x_epi_shape = floor(float(self.size_cnv["width"] / 2.0))
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        right_diag_horz = self.size_cnv["width"] - left_diag_horz
-        points = [(left_diag_horz, y_intercept_diag),
+        rigth_diag_horz = self.size_cnv["width"] - left_diag_horz
+        points = [(left_diag_horz, top_diag_vert + space_diag_vert),
                   (x_epi_shape, top_diag_vert),
-                  (right_diag_horz, y_intercept_diag),
+                  (rigth_diag_horz, top_diag_vert + space_diag_vert),
                   (x_epi_shape, bot_diag_vert)]
+        list_buff_x_horz = [0, 0, 1, -1]
+        if flip_vert:
+            points = [(left_diag_horz, bot_diag_vert - space_diag_vert),
+                      (x_epi_shape, top_diag_vert),
+                      (rigth_diag_horz, bot_diag_vert - space_diag_vert),
+                      (x_epi_shape, bot_diag_vert)]
+            list_buff_x_horz = [1, -1, 0, 0]
         pushMatrix()
         self.rotate_epi(rotate_deg)
-        self.render_shape(points, list_buff_x_horz=[0, 0, 1, -1])
+        self.render_shape(points, list_buff_x_horz)
         popMatrix()
 
     def rectangle_gen(self, height_shape, width_shape, rotate_deg):
@@ -196,10 +204,10 @@ class ShapesGenerator():
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_right_shape = self.size_cnv["width"] - x_left_shape
+        x_rigth_shape = self.size_cnv["width"] - x_left_shape
         points = [(x_left_shape, y_top_shape),
-                  (x_right_shape, y_top_shape),
-                  (x_right_shape, y_bot_shape),
+                  (x_rigth_shape, y_top_shape),
+                  (x_rigth_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -218,10 +226,10 @@ class ShapesGenerator():
         y_intercept_diag = floor(float(self.size_cnv["height"] / 2.0))
         # Axis (x) on diagonal horizontal
         left_diag_horz = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        right_diag_horz = self.size_cnv["width"] - left_diag_horz
+        rigth_diag_horz = self.size_cnv["width"] - left_diag_horz
         points = [(left_diag_horz, y_intercept_diag),
                   (x_intercept_diag, top_diag_vert),
-                  (right_diag_horz, y_intercept_diag),
+                  (rigth_diag_horz, y_intercept_diag),
                   (x_intercept_diag, bot_diag_vert)]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -233,19 +241,19 @@ class ShapesGenerator():
         # Standar of ratio base in range[0.25, 0.75]
         min_base = floor(ratio_base * width_shape)
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_right_shape = self.size_cnv["width"] - x_left_shape
+        x_rigth_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        points = [(x_right_shape - min_base, y_top_shape),
-                  (x_right_shape, y_top_shape),
+        points = [(x_rigth_shape - min_base, y_top_shape),
+                  (x_rigth_shape, y_top_shape),
                   (x_left_shape + min_base, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, 1, 0, 1]
         if flip_horz:
             points = [(x_left_shape, y_top_shape),
                       (x_left_shape + min_base, y_top_shape),
-                      (x_right_shape, y_bot_shape),
-                      (x_right_shape - min_base, y_bot_shape)]
+                      (x_rigth_shape, y_bot_shape),
+                      (x_rigth_shape - min_base, y_bot_shape)]
             list_buff_x_horz = [0, -1, 0, -1]
         pushMatrix()
         self.rotate_epi(rotate_deg)
@@ -258,23 +266,23 @@ class ShapesGenerator():
 
     def trapezoid_gen(self, height_shape, width_shape, rotate_deg, ratio_parallel, flip_vert):
         """Return trapezoid with one pair of parallel sides (determine by ratio)
-        Support isosceles, right-angle, and any trapezoid
+        Support isosceles, rigth-angle, and any trapezoid
         """
         # Standar of ratio parallel in range[0.25, 0.75]
         min_parallel = floor(ratio_parallel * width_shape)
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_right_shape = self.size_cnv["width"] - x_left_shape
+        x_rigth_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        space_unshape = floor(random(x_left_shape, x_right_shape - min_parallel))
+        space_unshape = floor(random(x_left_shape, x_rigth_shape - min_parallel))
         points = [(space_unshape, y_top_shape),
                   (space_unshape + min_parallel, y_top_shape),
-                  (x_right_shape, y_bot_shape),
+                  (x_rigth_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [0, -1, 0, 1]
         if flip_vert:
             points = [(x_left_shape, y_top_shape),
-                      (x_right_shape, y_top_shape),
+                      (x_rigth_shape, y_top_shape),
                       (space_unshape + min_parallel, y_bot_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, 0, -1]
@@ -285,25 +293,38 @@ class ShapesGenerator():
 
     def triangle_gen(self, height_shape, width_shape, rotate_deg, flip_vert):
         """Return triangle with base equals to width_shape
-        Support equilateral, isosceles, right-angle, and any triangle
+        Support equilateral, isosceles, rigth-angle, and any triangle
         """
         x_left_shape = floor(float(self.size_cnv["width"] - width_shape) / 2.0)
-        x_right_shape = self.size_cnv["width"] - x_left_shape
+        x_rigth_shape = self.size_cnv["width"] - x_left_shape
         y_top_shape = floor(float(self.size_cnv["height"] - height_shape) / 2.0)
         y_bot_shape = self.size_cnv["height"] - y_top_shape
-        space_unshape = floor(random(x_left_shape, x_right_shape))
+        space_unshape = floor(random(x_left_shape, x_rigth_shape))
         points = [(space_unshape, y_top_shape),
-                  (x_right_shape, y_bot_shape),
+                  (x_rigth_shape, y_bot_shape),
                   (x_left_shape, y_bot_shape)]
         list_buff_x_horz = [-1, 0, 1]
         if flip_vert:
             points = [(x_left_shape, y_top_shape),
-                      (x_right_shape, y_top_shape),
+                      (x_rigth_shape, y_top_shape),
                       (space_unshape, y_bot_shape)]
             list_buff_x_horz = [0, 1, -1]
         pushMatrix()
         self.rotate_epi(rotate_deg)
         self.render_shape(points, list_buff_x_horz)
+        popMatrix()
+        
+    def mask_dashed_line(self, activate=True, counter_deg=0):
+        if activate == False or self.img_mask_dashed_noise is None:
+            return
+        imageMode(CENTER)
+        pushMatrix()
+        translate(self.size_cnv["width"] / 2,
+                  self.size_cnv["height"] / 2)
+        rotate(radians(counter_deg % 360))
+        image(self.img_mask_dashed_noise, 0, 0,
+              self.size_cnv["width"],
+              self.size_cnv["height"])
         popMatrix()
 
 
@@ -322,12 +343,14 @@ shape_ = ShapesGenerator(size_cnv=size_canvas,
 
 
 def setup():
+    shape_.img_mask_dashed_noise = loadImage("assets/dashed_line_noise.png")
     size(size_canvas["width"], size_canvas["height"])
 
 img_counter = 0
 # Order: start => train => val => test => stop
 toggle_bool = True
 base_class_dir = train_dir
+print("Please wait, currently creating a dataset...")
 def draw():
     global base_class_dir
     global img_counter
@@ -336,7 +359,8 @@ def draw():
         base_class_dir = val_dir
     if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"]:
         base_class_dir = test_dir
-    shape_.stroke_weight = int(random(4, 10))
+    shape_.stroke_weight = int(random(4, 12))
+    # shape_.inc_time_noise = random(0.025, 0.035)
     # Rectangle
     background(255)
     min_length = int(random(50, 150))
@@ -344,6 +368,8 @@ def draw():
     shape_.rectangle_gen(height_shape=max_length if toggle_bool else min_length,
                          width_shape=min_length if toggle_bool else max_length,
                          rotate_deg=int(random(-5, 5)))
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "rectangle", "rectangle-{}.jpg".format(img_counter)))
     # Circle
     background(255)
@@ -351,19 +377,25 @@ def draw():
     shape_.circle_gen(height_shape=max_length if toggle_bool else min_length,
                       width_shape=min_length if toggle_bool else max_length,
                       rotate_deg=int(random(-180, 180)))
+    shape_.mask_dashed_line(activate=toggle_bool, counter_deg=img_counter)
     save(os.path.join(base_class_dir, "circle", "circle-{}.jpg".format(img_counter)))
     # Kite
     background(255)
     max_length = int(random(min_length + 30, 200))
     shape_.kite_gen(height_shape=max_length,
                     width_shape=min_length,
-                    rotate_deg=int(random(-30, 30)))
+                    rotate_deg=int(random(-15, 15)),
+                    flip_vert=toggle_bool)
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "kite", "kite-{}.jpg".format(img_counter)))
     # Rhombus
     background(255)
-    shape_.rhombus_gen(height_shape=max_length,
-                       width_shape=min_length,
-                       rotate_deg=int(random(-20, 20)))
+    shape_.rhombus_gen(height_shape=max_length if toggle_bool else min_length,
+                       width_shape=min_length if toggle_bool else max_length,
+                       rotate_deg=int(random(-5, 5)))
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "rhombus", "rhombus-{}.jpg".format(img_counter)))
     # Parallelogram
     background(255)
@@ -374,11 +406,14 @@ def draw():
                              rotate_deg=int(random(-10, 10)),
                              ratio_base=random(0.4, 0.7),
                              flip_horz=toggle_bool)
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "parallelogram", "parallelogram-{}.jpg".format(img_counter)))
     # Square
     background(255)
     shape_.square_gen(length_shape=int(random(50, 200)),
                       rotate_deg=int(random(-5, 5)))
+    shape_.mask_dashed_line(activate=toggle_bool, counter_deg=img_counter)
     save(os.path.join(base_class_dir, "square", "square-{}.jpg".format(img_counter)))
     # Trapezoid
     background(255)
@@ -387,15 +422,19 @@ def draw():
                          rotate_deg=int(random(-10, 10)),
                          ratio_parallel=random(0.35, 0.55),
                          flip_vert=toggle_bool)
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "trapezoid", "trapezoid-{}.jpg".format(img_counter)))
     # Triangle
     background(255)
-    min_length = int(random(50, 150))
-    max_length = int(random(min_length, 180))
+    min_length = int(random(50, 180))
+    max_length = int(random(min_length, 200))
     shape_.triangle_gen(height_shape=max_length if toggle_bool else min_length,
                         width_shape=min_length if toggle_bool else max_length,
-                        rotate_deg=int(random(-30, 30)),
+                        rotate_deg=int(random(-15, 15)),
                         flip_vert=toggle_bool)
+    shape_.mask_dashed_line(activate=bool(img_counter % 4 == 1 or img_counter % 4 == 2),
+                            counter_deg=img_counter)
     save(os.path.join(base_class_dir, "triangle", "triangle-{}.jpg".format(img_counter)))
     if img_counter == constants["NUM_TRAIN"] + constants["NUM_VAL"] + constants["NUM_TEST"] - 1:
         background(200)
