@@ -1,6 +1,6 @@
 # FlatShapeNet
 
-Dataset for the educational game [Ariga](ariga.profematika.com). The latest version supports hand-drawn plane shapes and data augmentation: rotation, horizontal-flip, vertical-flip and random erase (dash-line). Older versions can be accessed via the link: [github.com/reevald/MathEdu](https://github.com/reevald/MathEdu)
+Dataset for the educational game [Ariga](https://ariga.profematika.com/). The latest version supports hand-drawn plane shapes and data augmentation: rotation, horizontal-flip, vertical-flip and random erase (dash-line). Older versions can be accessed via the link: [github.com/reevald/MathEdu](https://github.com/reevald/MathEdu)
 
 ## Dataset
 ![Banner Dataset](./hand_drawn_shape/assets/banner.PNG)  
