@@ -4,7 +4,7 @@ Dataset for the educational game [Ariga](https://ariga.profematika.com/). The la
 
 ## Dataset
 ![Banner Dataset](./hand_drawn_shape/assets/banner.PNG)  
-Download: [https://www.kaggle.com/datasets/geometric-shapes-mathematics](https://www.kaggle.com/datasets/geometric-shapes-mathematics)  
+Download (122 MB): [https://www.kaggle.com/datasets/reevald/geometric-shapes-mathematics](https://www.kaggle.com/datasets/reevald/geometric-shapes-mathematics)  
 The dataset spans eight classes: circle, kite, parallelogram, rectangle, rhombus, square, trapezoid, triangle. The dataset consists of 20,000 images.
 
 - Circle: Train(1,500); Val(500); Test(500)
